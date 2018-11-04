@@ -35,8 +35,12 @@ def save_doc(lines, filename):
 
 
 file2 = open(r"simple-examples/data/ptb.char.train.txt","r") 
-data=file2.read()
+raw_text=file2.read()
 
+
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts([raw_text])
+encoded = tokenizer.texts_to_sequences([raw_text])[0]
 
 # load text
 raw_text = load_doc('rhyme.txt')
@@ -96,7 +100,7 @@ print(model.summary())
 # compile model
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 # fit model
-history=model.fit(X, y, epochs=100, verbose=2)
+history=model.fit(X, y, epochs=10, verbose=2)
 print(history)
 # generate a sequence of characters with a language model
 def generate_seq(model, mapping, seq_length, seed_text, n_chars):
