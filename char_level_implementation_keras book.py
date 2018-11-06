@@ -143,7 +143,6 @@ val_sentences, val_label=create_sequences(val_text,maxlen,step)
 
 
 
-
 chars, char_indices=mapping(train_text)
 train_x, train_y=one_hot_encode(train_sentences, chars, char_indices, train_label, maxlen)
 val_x, val_y=one_hot_encode(val_sentences, chars, char_indices, val_label, maxlen)

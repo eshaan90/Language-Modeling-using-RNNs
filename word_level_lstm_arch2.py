@@ -29,6 +29,9 @@ For ye are naughty kittens."""
 file2 = open(r"simple-examples/data/ptb.train.txt","r") 
 data=file2.read()
 
+file_test = open(r"simple-examples/data/ptb.test.txt","r") 
+test_data=file_test.read()
+
 
 tokenizer = Tokenizer()
 def dataset_preparation(data):
@@ -89,11 +92,13 @@ def generate_text(seed_text, next_words, max_sequence_len, model):
 
 X, Y, max_len, total_words = dataset_preparation(data)
 model = create_model(X, Y, max_len, total_words)
+model.save('word_lstm_model.h5')
 
-text = generate_text("cat and", 3, max_len, model)
+seed_text=test_data[0:27]
+max_len=2
+text = generate_text(seed_text, 50, max_len, model)
 print(text)
 
 text = generate_text("we naughty", 3, max_len, model)
 print(text)
-
 

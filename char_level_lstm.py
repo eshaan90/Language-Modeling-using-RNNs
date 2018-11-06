@@ -15,6 +15,8 @@ from pickle import load
 from keras.models import load_model
 from keras.preprocessing.sequence import pad_sequences
 import argparse
+from keras.preprocessing.text import Tokenizer
+
 
 # load doc into memory
 def load_doc(filename):
@@ -92,16 +94,20 @@ X =np.array(sequences)
 y = to_categorical(y, num_classes=vocab_size)
 
 # define model
+optim=optimizers.Adam(lr=0.001)
 model = models.Sequential()
-model.add(layers.LSTM(75, input_shape=(X.shape[1], X.shape[2])))
+model.add(layers.LSTM(100, input_shape=(X.shape[1], X.shape[2])))
 model.add(layers.Dense(vocab_size, activation='softmax'))
 print(model.summary())
 
 # compile model
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.compile(loss='categorical_crossentropy', optimizer=optim, metrics=['accuracy'])
 # fit model
-history=model.fit(X, y, epochs=10, verbose=2)
+history=model.fit(X, y, batch_size=30, epochs=5, verbose=2)
 print(history)
+model.save('char_lstm_model.h5')
+
+
 # generate a sequence of characters with a language model
 def generate_seq(model, mapping, seq_length, seed_text, n_chars):
 	in_text = seed_text
