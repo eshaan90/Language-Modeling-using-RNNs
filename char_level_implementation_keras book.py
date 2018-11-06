@@ -158,7 +158,8 @@ acc=[]
 loss=[]
 val_acc=[]
 val_loss=[]
-acc, loss,val_acc,val_loss=train_and_predict(model, train_text, train_x, train_y, val_x, val_y, no_of_epochs, batch_size, maxlen, char_indices)
+acc, loss,val_acc,val_loss=train_and_predict(model, train_text, train_x, train_y, val_x, val_y, 
+                                             no_of_epochs, batch_size, maxlen, char_indices)
 
 print("Training Acc: ", acc)
 print("Training Loss: ", loss)

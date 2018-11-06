@@ -56,12 +56,12 @@ def create_sequences(text,maxlen,step):
     return sentences,next_word
     
 
-def create_model(words,maxlen,vocab_size):
+def create_model(words,maxlen,vocab_size,batch_size):
     model=keras.models.Sequential()
-    model.add(layers.Embedding(vocab_size, 10, input_length=maxlen))
+    model.add(layers.Embedding(vocab_size, 64, input_length=maxlen-1))
     model.add(layers.LSTM(200,recurrent_dropout=0.5, return_sequences=True, input_shape=(maxlen,len(words))))
     model.add(layers.LSTM(200,recurrent_dropout=0.5))
-    model.add(layers.Dense(len(words),activation='softmax'))
+    model.add(layers.Dense(vocab_size,activation='softmax'))
     optimizer=keras.optimizers.Adam(lr=1)
     model.compile(loss='categorical_crossentropy',optimizer=optimizer,metrics=['acc'])
     model.summary()
@@ -129,13 +129,13 @@ train_text=data.split()
 
 maxlen=40
 step=3
-no_of_epochs=1
+no_of_epochs=2
 batch_size=128
 
 #
-## integer encode text
-#tokenizer = Tokenizer()
-#tokenizer.fit_on_texts([data])
+# integer encode text
+tokenizer = Tokenizer()
+tokenizer.fit_on_texts([data])
 #encoded = tokenizer.texts_to_sequences([data])[0]
 
 
@@ -148,10 +148,10 @@ train_sentences, train_label=create_sequences(train_text,maxlen,step)
 words, word_indices=mapping(train_text)
 train_x, train_y=one_hot_encode(train_sentences, words, word_indices, train_label, maxlen)
 
-vocab_size = word_indeices + 1
+vocab_size = len(word_indices) + 1
 print('Vocabulary Size: %d' % vocab_size)
 
-model=create_model(words,maxlen,vocab_size)
+model=create_model(words,maxlen,vocab_size,batch_size)
 
 acc=[]
 loss=[]
@@ -163,5 +163,3 @@ print("Training Acc: ", acc)
 print("Training Loss: ", loss)
 print("Validation Acc: ", val_acc)
 print("Validation Loss: ", val_loss)
-
-
