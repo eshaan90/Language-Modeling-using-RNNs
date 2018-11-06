@@ -14,6 +14,7 @@ import keras.utils as ku
 from keras.utils import to_categorical
 import numpy as np
 import random
+import matplotlib.pyplot as plt
 
 
 data = """The cat and her kittens
@@ -29,8 +30,6 @@ For we have lost our mittens."
 For ye are naughty kittens."""
 
 
-
-tokenizer = Tokenizer()
 
 def dataset_preparation(data):
 
@@ -88,7 +87,30 @@ def dataset_preparation(data):
     return predictors, label, maxlen, total_words
 
 
-def generate_text(seed_text, next_words, max_sequence_len, no_of_epochs):
+def create_model(predictors, label, max_sequence_len, total_words):
+    model = Sequential()
+    model.add(Embedding(total_words, 100, input_length=maxlen-1))
+    model.add(LSTM(200, return_sequences = True))
+    model.add(Dropout(0.5))
+    model.add(LSTM(200))
+    model.add(Dropout(0.5))
+    model.add(Dense(total_words, activation='softmax'))
+
+    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    print(model.summary())
+    return model 
+
+
+def sample(preds,temperature=1.0):
+    preds=np.asarray(preds).astype('float64')
+    preds=np.log(preds)/temperature
+    exp_preds=np.exp(preds)
+    preds=exp_preds/np.sum(exp_preds)
+    probas=np.random.multinomial(1,preds,1)
+    return np.argmax(probas)
+
+
+def generate_text(model, seed_text, next_words, maxlen, no_of_epochs):
 	
     acc=[]
     val_acc=[]
@@ -101,41 +123,31 @@ def generate_text(seed_text, next_words, max_sequence_len, no_of_epochs):
         history=model.fit(predictors, label, epochs=1, batch_size=128, validation_split=0.2,verbose=1,callbacks=callbacks_list)
         
         history_dict=history.history
-        loss.append(history_dict['loss'])
-        val_loss.append(history_dict['val_loss'])
-        acc.append(history_dict['acc'])
-        val_acc.append(history_dict['val_acc'])
+        loss.append(history_dict['loss'][0])
+        val_loss.append(history_dict['val_loss'][0])
+        acc.append(history_dict['acc'][0])
+        val_acc.append(history_dict['val_acc'][0])
     
         for _ in range(next_words):
             token_list = tokenizer.texts_to_sequences([seed_text])[0]
+            token_list = pad_sequences([token_list], maxlen=maxlen-1, padding='pre')
             predicted = model.predict_classes(token_list, verbose=0)
-        		
+#        	next_index = sample(preds, temperature)
+#            next_word = words[next_index]	
             output_word = ""
             for word, index in tokenizer.word_index.items():
                 if index == predicted:
                     output_word = word
                     break
             seed_text += " " + output_word
-    return seed_text
+        print(seed_text)
+    return loss, val_loss, acc, val_acc
 
-
-def create_model(predictors, label, max_sequence_len, total_words):
-    model = Sequential()
-    model.add(Embedding(total_words, 10, input_length=maxlen-1))
-    model.add(LSTM(150, return_sequences = True))
-    model.add(Dropout(0.5))
-    model.add(LSTM(150))
-    model.add(Dropout(0.5))
-    model.add(Dense(total_words, activation='softmax'))
-
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-    print(model.summary())
-    return model 
 
 
 file2 = open(r"simple-examples/data/ptb.train.txt","r") 
 data=file2.read()
-data=data[0:600000]
+data=data[0:1500000]
 data=data.replace('-',' - ');
 
 #train_text=data.split()
@@ -143,20 +155,28 @@ data=data.replace('-',' - ');
 maxlen=40
 step=3
 no_of_epochs=3
-batch_size=128
+#batch_size=128
 
-next_words=80
+next_words=40
 
 #data = open('data.txt').read()
 
+
+tokenizer = Tokenizer()
 predictors, label, maxlen, total_words= dataset_preparation(data)
 model = create_model(predictors, label, maxlen, total_words)
 
-start_index=random.randint(0,len(data)- maxlen- 1)
-seed_text=data[start_index:start_index + maxlen]
+data_list=data.split()
+
+start_index=random.randint(0,len(data_list)- maxlen- 1)
+seed_text=' '.join(data_list[start_index:start_index + maxlen])
 print('---Generating with seed: "'+ seed_text + '"')
 
-print(generate_text(seed_text, 3, maxlen))
+loss, val_loss, acc, val_acc=generate_text(model,seed_text, next_words, maxlen, no_of_epochs)
 
-
-print(generate_text("we naughty", 40, maxlen))
+plt.figure(1)
+plt.plt(range(no_of_epochs),loss)
+plt.plot(range(no_of_epochs),val_loss)
+plt.legend()
+plt.show()
+#print(generate_text("we naughty", 40, maxlen))
