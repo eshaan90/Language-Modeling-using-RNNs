@@ -7,61 +7,17 @@ Created on Tue Nov  6 04:14:02 2018
 
 from keras.preprocessing.sequence import pad_sequences
 from keras.layers import Embedding, LSTM, Dense,Dropout
-from keras.preprocessing.text import Tokenizer,text_to_word_sequence
-from keras import callbacks
+from keras.preprocessing.text import Tokenizer
+from keras import callbacks,optimizers
 from keras.models import Sequential
 import keras.utils as ku
-from keras.utils import to_categorical
 import numpy as np
 import random
 import matplotlib.pyplot as plt
 
 
-data = """The cat and her kittens
-They put on their mittens,
-To eat a Christmas pie.
-The poor little kittens
-They lost their mittens,
-And then they began to cry.
-O mother dear, we sadly fear
-We cannot go to-day,
-For we have lost our mittens."
-"If it be so, ye shall not go,
-For ye are naughty kittens."""
-
-
 
 def dataset_preparation(data):
-
-	# basic cleanup
-#	corpus = data.lower().split("\n")
-#
-#	# tokenization	
-#	tokenizer.fit_on_texts(corpus)
-#	total_words = len(tokenizer.word_index) + 1
-#    l=text_to_word_sequence(data,lower=True,split=' ')
-#
-#	# create input sequences using list of tokens
-#    train_sentences, train_label=create_sequences(train_text,maxlen,step)
-#    
-#	input_sequences = []
-#	for line in corpus:
-#		token_list = tokenizer.texts_to_sequences([line])[0]
-#		for i in range(1, len(token_list)):
-#			n_gram_sequence = token_list[:i+1]
-#			input_sequences.append(n_gram_sequence)
-#            
-#
-#	# pad sequences 
-#	max_sequence_len = max([len(x) for x in input_sequences])
-#	input_sequences = np.array(pad_sequences(input_sequences, maxlen=max_sequence_len, padding='pre'))
-#
-#	# create predictors and label
-#	predictors, label = input_sequences[:,:-1],input_sequences[:,-1]
-#	label = ku.to_categorical(label, num_classes=total_words)
-
-
-
 
     tokenizer.fit_on_texts([data])
     total_words = len(tokenizer.word_index) + 1
@@ -90,12 +46,12 @@ def dataset_preparation(data):
 def create_model(predictors, label, max_sequence_len, total_words):
     model = Sequential()
     model.add(Embedding(total_words, 100, input_length=maxlen-1))
-    model.add(LSTM(200, return_sequences = True))
+    model.add(LSTM(50, return_sequences = True))
     model.add(Dropout(0.5))
-    model.add(LSTM(200))
+    model.add(LSTM(50))
     model.add(Dropout(0.5))
     model.add(Dense(total_words, activation='softmax'))
-
+    optimizer=optimizers.Adam(lr=0.01)
     model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
     print(model.summary())
     return model 
@@ -154,7 +110,7 @@ data=data.replace('-',' - ');
 
 maxlen=40
 step=3
-no_of_epochs=3
+no_of_epochs=10
 #batch_size=128
 
 next_words=40
@@ -166,8 +122,8 @@ tokenizer = Tokenizer()
 predictors, label, maxlen, total_words= dataset_preparation(data)
 model = create_model(predictors, label, maxlen, total_words)
 
-data_list=data.split()
 
+data_list=data.split()
 start_index=random.randint(0,len(data_list)- maxlen- 1)
 seed_text=' '.join(data_list[start_index:start_index + maxlen])
 print('---Generating with seed: "'+ seed_text + '"')
