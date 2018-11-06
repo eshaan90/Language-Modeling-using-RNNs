@@ -1,7 +1,13 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sun Nov  4 17:39:08 2018
+Created on Mon Nov  5 01:34:57 2018
 
+@author: MyReservoir
+"""
+
+"""
+Created on Sun Nov  4 17:39:08 2018
 @author: evkirpal
 """
 
@@ -11,7 +17,6 @@ import random
 import sys
 from keras import layers
 from collections import Counter
-import re
 
 def load_data(data):
     #Loading data
@@ -134,7 +139,7 @@ val_counter=Counter(val_text)
 
 maxlen=60
 step=3
-no_of_epochs=10
+no_of_epochs=20
 batch_size=128
 sentences=[]
 next_chars=[]
@@ -155,5 +160,7 @@ val_acc=[]
 val_loss=[]
 acc, loss,val_acc,val_loss=train_and_predict(model, train_text, train_x, train_y, val_x, val_y, no_of_epochs, batch_size, maxlen, char_indices)
 
-if __name__=='__main__':
-    main()
+print("Training Acc: ", acc)
+print("Training Loss: ", loss)
+print("Validation Acc: ", val_acc)
+print("Validation Loss: ", val_loss)
