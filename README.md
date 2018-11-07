@@ -19,4 +19,9 @@ We pass our predictors and labels into an embedding layer with 500 hidden units.
 The rest of the network is a double LSTM layer with 500 hidden units followed by a dropout layer and finally a 
 Dense softmax classifier over all possible characters.
 
+
+To Run(for both): 
+Download the dataset and change the dataset file path location in the code file.
+
+
 Results and graphs are summarized in the Report.pdf file.
