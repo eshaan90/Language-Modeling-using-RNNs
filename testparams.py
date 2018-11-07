@@ -174,7 +174,7 @@ train_x, train_y=one_hot_encode(train_sentences, chars, char_indices, train_labe
 #val_x, val_y=one_hot_encode(val_sentences, chars, char_indices, val_label, maxlen)
 
 
-for hiddenlayers in [100]:
+for hiddenlayers in [50]:
     for parallellayer in [1]:
         for learningRate in [.01]:
             # already have results for these

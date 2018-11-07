@@ -34,7 +34,7 @@ def dataset_preparation(data,maxlen,step):
         while j<i+maxlen:
             seq=encoded[i:j+1]
             sequences.append(seq)
-            j=j+4
+            j=j+2
             
 ##    	sequence = encoded[i:i+maxlen]
 ##    	sequences.append(sequence)
@@ -53,10 +53,10 @@ def dataset_preparation(data,maxlen,step):
 
 def create_model(predictors, label, max_sequence_len, total_words):
     model = Sequential()
-    model.add(Embedding(total_words, 50, input_length=max_sequence_len-1))
-    model.add(LSTM(50, return_sequences = True))
+    model.add(Embedding(total_words, 500, input_length=max_sequence_len-1))
+    model.add(LSTM(400 , return_sequences = True))
     model.add(Dropout(0.5))
-    model.add(LSTM(50))
+    model.add(LSTM(400))
     model.add(Dropout(0.5))
     model.add(Dense(total_words, activation='softmax'))
     optimizer=optimizers.Adam(lr=0.01)
@@ -76,7 +76,7 @@ def generate_text(model, seed_text, next_words, max_sequence_len, no_of_epochs):
         print('epoch {} of {}'.format(epoch,no_of_epochs-1))
         
         callbacks_list=[callbacks.ModelCheckpoint(filepath='lstm_word_model.h5')]
-        history=model.fit(predictors, label, epochs=1, batch_size=128, validation_split=0.2,verbose=1,callbacks=callbacks_list)
+        history=model.fit(predictors, label, epochs=no_of_epochs, batch_size=128, validation_split=0.2,verbose=1,callbacks=callbacks_list)
         
         history_dict=history.history
         loss.append(history_dict['loss'][0])
@@ -103,13 +103,13 @@ backend.clear_session()
 
 file2 = open(r"simple-examples/data/ptb.train.txt","r") 
 data=file2.read()
-data=data[0:1500000]
+data=data[0:4000000]
 data=data.replace('-',' - ');
 
 
 maxlen=40
 step=3
-no_of_epochs=2
+no_of_epochs=10
 #batch_size=128
 
 next_words=40
@@ -129,14 +129,28 @@ print('---Generating with seed: "'+ seed_text + '"')
 
 loss, val_loss, acc, val_acc=generate_text(model,seed_text, next_words, max_sequence_len, no_of_epochs)
 
-
+print('Trianing Loss= {}'.format(loss))
+print('Testing Loss= {}'.format(val_loss))
+print('Trianing Acc= {}'.format(acc))
+print('Trianing Acc= {}'.format(val_acc))
 
 plt.figure(1)
-plt.plt(range(no_of_epochs),loss)
-plt.plot(range(no_of_epochs),val_loss)
+plt.plot(range(no_of_epochs-1),loss,)
+plt.plot(range(no_of_epochs-1),val_loss)
 plt.xlabel('Epochs')
-plt.ylabel('Perplexity')
-plt.title('Perplexity vs Epochs')
-plt.legend(loc='best')
+plt.ylabel('Loss')
+plt.title('Loss vs Epochs')
+plt.legend(labels=['Training','Validation'],loc='best')
+plt.grid()
+plt.show()
+
+
+plt.figure(2)
+plt.plot(range(no_of_epochs-1),acc,)
+plt.plot(range(no_of_epochs-1),val_acc)
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.title('Accuracy vs Epochs')
+plt.legend(labels=['Training','Validation'],loc='best')
 plt.grid()
 plt.show()
